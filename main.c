@@ -15,7 +15,7 @@ int main() {
 	
 	setup_brk();
 	void *initial_brk = original_brk;
-	void *f_pnt, *s_pnt, *t_pnt;
+	void *f_pnt, *s_pnt, *t_pnt, *fo_pnt;
 
 	f_pnt = memory_alloc(100, 0);
 	printf("==>> ALOCANDO UM ESPAÇO DE 100 BYTES WORST FIT:\n");
