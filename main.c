@@ -52,7 +52,7 @@ int main() {
 	
 	printf("==>> ALOCANDO UM ESPAÇO DE 40 BYTES BEST FIT:\n");
 	fo_pnt = memory_alloc(40, 1);
-	printf("\LOCAL: %s\n", *((long long*) (s_pnt+59)) == fo_pnt ? "CORRETO!" : "INCORRETO!");
+	printf("\LOCAL: %s\n", (s_pnt+59) == fo_pnt ? "CORRETO!" : "INCORRETO!");
 	printf("\tIND. DE USO: %s\n", *((char*) (fo_pnt-9)) == 1 ? "CORRETO!" : "INCORRETO!");
 	printf("\tTAMANHO: %s\n", *((long long*) (fo_pnt-8)) == 41 ? "CORRETO!" : "INCORRETO!");
 
