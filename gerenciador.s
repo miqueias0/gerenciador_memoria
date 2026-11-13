@@ -14,7 +14,11 @@
 memory_free:
     pushq %rbp
     movq %rsp, %rbp
+    cmpq current_brk, %rax
+    jg _invalido
     movb $0, -9(%rax)
+    _invalido:
+    movq $0, %rax
     popq %rbp
     ret
 
@@ -47,46 +51,54 @@ best_fit:
 
     movq original_brk, %r8
     movq current_brk, %r9
+    movq current_brk, %r10
+
+    movq $0x7FFFFFFFFFFFFFFF, %r11
 
     _loop:
     cmpq %r8, %r9
-    jle _alocar
-    cmpb $1, (%r8)
-    je _continua
+    jle _fim_l
+    cmpq $1, (%r8)
+    je _continuar
     cmpq %rdi, 1(%r8)
-    jge _fim_l
-    _continua:
+    jl _continuar
+    cmpq %r11, 1(%r8)
+    jge _continuar
+    movq %r8, %r10
+    movq 1(%r8), %r11
+    _continuar:
     addq 1(%r8), %r8
     addq $9, %r8
     jmp _loop
 
     _fim_l:
-    movq 1(%r8), %r9
-    subq %rdi, %r9
-    cmpq $9, %r9
+    cmpq %r10, %r9
+    jle _alocar
+    subq %rdi, %r11
+    cmpq $9, %r11
     jle _fim
-    subq $9, %r9
-    movb $0, 9(%r8,%rdi,1)
-    movq %r9, 10(%r8,%rdi,1)
-    movq %rdi, 1(%r8)
+    subq $9, %r11
+    movb $0, 9(%r10, %rdi, 1)
+    movq %r11, 10(%r10, %rdi, 1)
+    movq %rdi, 1(%r10)
     jmp _fim
 
     _alocar:
     movq $12, %rax
     addq $9, %rdi
     pushq %rdi
-    addq %r9, %rdi
+    addq %r10, %rdi
     syscall
     movq %rax, current_brk
     popq %rdi
     subq %rdi, %rax
-    subq $9, %rdi
     movq %rax, %r10
-    movq %rdi, 1(%r8)
+    subq $9, %rdi
+    movq %rdi, 1(%r10)
 
     _fim:
-    movb $1, (%r8)
-    movq %r8, %rax
+    movb $1, (%r10)
+    movq %r10, %rax
     addq $9, %rax
 
     popq %rbp
@@ -145,7 +157,6 @@ worst_fit:
 
     _fim_2:
     movb $1, (%r10)
-    movq %rdi, 1(%r10)
     movq %r10, %rax
     addq $9, %rax
 
