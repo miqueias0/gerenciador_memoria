@@ -50,9 +50,11 @@ memory_alloc:
     movq current_brk, %r10
 
     movq $0x7FFFFFFFFFFFFFFF, %r11
+    movq $_best_fit, %rcx
     cmpq $1, %rsi
     je _loop
     movq %rdi, %r11
+    movq $_worst_fit, %rcx
 
     _loop:
     cmpq %r8, %r9
@@ -61,13 +63,12 @@ memory_alloc:
     je _continuar
     cmpq %rdi, 1(%r8)
     jl _continuar
-    cmpq $0, %rsi
-    je _worst
     cmpq %r11, 1(%r8)
+    jmp %rcx
+    _best_fit:
     jge _continuar
     jmp _guardar
-    _worst:
-    cmpq %r11, 1(%r8)
+    _worst_fit:
     jl _continuar
     _guardar:
     movq %r8, %r10
