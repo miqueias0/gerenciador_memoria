@@ -13,11 +13,13 @@
 memory_free:
     pushq %rbp
     movq %rsp, %rbp
-    cmpq current_brk, %rax
-    jg _invalido
-    movb $0, -9(%rax)
-    _invalido:
+    cmpq current_brk, %rdi
+    jae _invalido
+    cmpq original_brk, %rdi
+    jbe _invalido
+    movb $0, -9(%rdi)
     movq $0, %rax
+    _invalido:
     popq %rbp
     ret
 
@@ -27,6 +29,7 @@ dismiss_brk:
     movq $12, %rax
     movq original_brk, %rdi
     syscall
+    movq %rax, current_brk
     popq %rbp
     ret
 
@@ -58,18 +61,18 @@ memory_alloc:
 
     _loop:
     cmpq %r8, %r9
-    jle _fim_l
-    cmpq $1, (%r8)
+    jbe _fim_l
+    cmpb $1, (%r8)
     je _continuar
     cmpq %rdi, 1(%r8)
-    jl _continuar
+    jb _continuar
     cmpq %r11, 1(%r8)
     jmp %rcx
     _best_fit:
-    jge _continuar
+    jae _continuar
     jmp _guardar
     _worst_fit:
-    jl _continuar
+    jb _continuar
     _guardar:
     movq %r8, %r10
     movq 1(%r8), %r11
@@ -80,10 +83,10 @@ memory_alloc:
 
     _fim_l:
     cmpq %r10, %r9
-    jle _alocar
+    jbe _alocar
     subq %rdi, %r11
     cmpq $9, %r11
-    jle _fim
+    jbe _fim
     subq $9, %r11
     movb $0, 9(%r10, %rdi, 1)
     movq %r11, 10(%r10, %rdi, 1)
