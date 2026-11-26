@@ -11,17 +11,17 @@
 .section .text
 
 memory_free:
-    ; Rotina na chamada de procedimentos 
+    # Rotina na chamada de procedimentos 
     pushq %rbp
     movq %rsp, %rbp
 
-    ; Verificação se o endereço está dentro da heap
+    # Verificação se o endereço está dentro da heap
     cmpq current_brk, %rdi
     jae _invalido
     cmpq original_brk, %rdi
     jbe _invalido
 
-    ; Verificação se o endereço é um endereço real de um bloco alocado 
+    # Verificação se o endereço é um endereço real de um bloco alocado 
     movq original_brk, %r8
     addq $9, %r8
     _free_l:
@@ -35,42 +35,60 @@ memory_free:
     cmpq %rdi, %r8
     jne _invalido
 
-    ; Procedimento de marcar o bloco como livre
+    # Procedimento de marcar o bloco como livre
     movb $0, -9(%rdi)
     movq $0, %rax
     _invalido:
+    # Rotina no retorno de procedimentos
     popq %rbp
     ret
 
 dismiss_brk:
+    # Rotina na chamada de procedimentos 
     pushq %rbp
     movq %rsp, %rbp
+
+    # Voltar o brk para o brk inicial 
     movq $12, %rax
     movq original_brk, %rdi
     syscall
     movq %rax, current_brk
+
+    # Rotina no retorno de procedimentos
     popq %rbp
     ret
 
 setup_brk:
+    # Rotina na chamada de procedimentos
     pushq %rbp
     movq %rsp, %rbp
+
+    # Salva os limites iniciais da heap nas variáveis globais
     movq $12, %rax
     movq $0, %rdi
     syscall
     movq %rax, original_brk
     movq %rax, current_brk
+
+    # Rotina no retorno de procedimentos
     popq %rbp
     ret
 
 memory_alloc:
+    # Rotina na chamada de procedimentos
     pushq %rbp
     movq %rsp, %rbp
 
+    # Setup dos registradores utilizados
+    # %r8 = 
     movq original_brk, %r8
+    # %r9 = 
     movq current_brk, %r9
+    # %r10 = 
     movq current_brk, %r10
+    # %r11 = 
 
+    # Setup para utilizar uma das estratégias de alocação, salvando o rótulo da estratégia em %rcx
     movq $0x7FFFFFFFFFFFFFFF, %r11
     movq $_best_fit, %rcx
     cmpq $1, %rsi
@@ -78,13 +96,16 @@ memory_alloc:
     movq %rdi, %r11
     movq $_worst_fit, %rcx
 
+    # Loop para encontar o melhor bloco livre disponível
     _loop:
     cmpq %r8, %r9
     jbe _fim_l
+    # Passa para o próximo caso esteja em uso ou menor do que precisamos 
     cmpb $1, (%r8)
     je _continuar
     cmpq %rdi, 1(%r8)
     jb _continuar
+    # Comparação que é interpretada pela estratégia escolhida 
     cmpq %r11, 1(%r8)
     jmp *%rcx
     _best_fit:
@@ -92,17 +113,23 @@ memory_alloc:
     jmp _guardar
     _worst_fit:
     jb _continuar
+    # Garda o endereço que é o melhor até o momento
     _guardar:
     movq %r8, %r10
     movq 1(%r8), %r11
+
+    # Prepara o loop para o próximo bloco 
     _continuar:
     addq 1(%r8), %r8
     addq $9, %r8
     jmp _loop
 
+    # Fim do loop por acabar os blocos existentes 
     _fim_l:
+    # Se for igual o brk atual significa que não achou um bloco utilizavel e precisa alocar 
     cmpq %r10, %r9
     jbe _alocar
+    # Se o que sobrou de do novo bloco for pelo menos 10 cria um bloco novo após o que foi pedido, se não aloca o bloco com bytes a mais 
     subq %rdi, %r11
     cmpq $9, %r11
     jbe _fim
@@ -112,6 +139,7 @@ memory_alloc:
     movq %rdi, 1(%r10)
     jmp _fim
 
+    # Aloca memória extra caso não tenha nenhum bloco funcional disponível 
     _alocar:
     movq $12, %rax
     addq $9, %rdi
@@ -125,10 +153,12 @@ memory_alloc:
     subq $9, %rdi
     movq %rdi, 1(%r10)
 
+    # Marca o bloco como alocado e coloca o endereço de rotorno em %rax
     _fim:
     movb $1, (%r10)
     movq %r10, %rax
     addq $9, %rax
 
+    # Rotina no retorno de procedimentos
     popq %rbp
     ret
