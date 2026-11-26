@@ -11,13 +11,17 @@
 .section .text
 
 memory_free:
+    ; Rotina na chamada de procedimentos 
     pushq %rbp
     movq %rsp, %rbp
 
+    ; Verificação se o endereço está dentro da heap
     cmpq current_brk, %rdi
     jae _invalido
     cmpq original_brk, %rdi
     jbe _invalido
+
+    ; Verificação se o endereço é um endereço real de um bloco alocado 
     movq original_brk, %r8
     addq $9, %r8
     _free_l:
@@ -31,6 +35,7 @@ memory_free:
     cmpq %rdi, %r8
     jne _invalido
 
+    ; Procedimento de marcar o bloco como livre
     movb $0, -9(%rdi)
     movq $0, %rax
     _invalido:
