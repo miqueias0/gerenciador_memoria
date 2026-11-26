@@ -39,7 +39,11 @@ memory_free:
     movb $0, -9(%rdi)
     # Retorno do procedimento 
     movq $0, %rax
+    jmp _ret_f
     _invalido:
+    movq $1, %rax
+
+    _ret_f:
     # Rotina no retorno de procedimentos
     popq %rbp
     ret
@@ -94,10 +98,15 @@ memory_alloc:
     # %r11 = 
 
     # Setup para utilizar uma das estratégias de alocação, salvando o rótulo da estratégia em %rcx
+    # %r11 guarda o menor/maior tamanho de bloco livre compatível encontrado até agora
+    # Começa em 0x7FFFFFFFFFFFFFFF (maior valor possível com bit mais significativo igual a 0)
+    # Para garantir que qualquer tamanho válido seja menor na primeira comparação do algoritmo best-fit
     movq $0x7FFFFFFFFFFFFFFF, %r11
     movq $_best_fit, %rcx
     cmpq $1, %rsi
     je _loop
+    # Usa o tamanho pedido em %rdi como limite inicial do worst-fit
+    # blocos livres maiores que %r11 substituirão o melhor candidato atual
     movq %rdi, %r11
     movq $_worst_fit, %rcx
 
@@ -110,7 +119,10 @@ memory_alloc:
     je _continuar
     cmpq %rdi, 1(%r8)
     jb _continuar
-    # Comparação que é interpretada pela estratégia escolhida 
+    # Comparação que é interpretada pela estratégia escolhida
+    # Pula para o endereço do rótulo da estratégia escolhida
+    # Tira a necessidade de ficar comparando qual a estratégia escolhida
+    # Em cada iteração
     cmpq %r11, 1(%r8)
     jmp *%rcx
     _best_fit:
