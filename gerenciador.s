@@ -13,10 +13,24 @@
 memory_free:
     pushq %rbp
     movq %rsp, %rbp
+
     cmpq current_brk, %rdi
     jae _invalido
     cmpq original_brk, %rdi
     jbe _invalido
+    movq original_brk, %r8
+    addq $9, %r8
+    _free_l:
+    cmpq %rdi, %r8
+    jae _fim_free
+    addq -8(%r8), %r8
+    addq $9, %r8
+    jmp _free_l
+
+    _fim_free:
+    cmpq %rdi, %r8
+    jne _invalido
+
     movb $0, -9(%rdi)
     movq $0, %rax
     _invalido:
@@ -67,7 +81,7 @@ memory_alloc:
     cmpq %rdi, 1(%r8)
     jb _continuar
     cmpq %r11, 1(%r8)
-    jmp %rcx
+    jmp *%rcx
     _best_fit:
     jae _continuar
     jmp _guardar
