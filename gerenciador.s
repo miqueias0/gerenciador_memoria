@@ -80,6 +80,10 @@ memory_alloc:
     pushq %rbp
     movq %rsp, %rbp
 
+    # Se for negativo ou zero retorna NULL
+    cmpq $0, %rdi
+    jle _erroAlloc
+
     # Setup dos registradores utilizados
     # %r8 = 
     movq original_brk, %r8
@@ -151,18 +155,20 @@ memory_alloc:
     # Verifica se alocou 
     popq %rdi
     cmpq %rax, current_brk
-    jne _certoAlloc
+    je _erroAlloc
 
-    movq $0, %rax
-    jmp _teste
-
-    _certoAlloc:
+    # Se alocou arruma os endereços 
     movq %rax, current_brk
     subq %rdi, %rax
     movq %rax, %r10
     subq $9, %rdi
     movq %rdi, 1(%r10)
     jmp _fim
+
+    # Se não alocou a memória retorna NULL
+    _erroAlloc:
+    movq $0, %rax
+    jmp _ret
 
     # Marca o bloco como alocado e coloca o endereço de rotorno em %rax
     _fim:
@@ -171,6 +177,6 @@ memory_alloc:
     addq $9, %rax
 
     # Rotina no retorno de procedimentos
-    _teste:
+    _ret:
     popq %rbp
     ret
