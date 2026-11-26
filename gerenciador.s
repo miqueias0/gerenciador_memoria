@@ -37,6 +37,7 @@ memory_free:
 
     # Procedimento de marcar o bloco como livre
     movb $0, -9(%rdi)
+    # Retorno do procedimento 
     movq $0, %rax
     _invalido:
     # Rotina no retorno de procedimentos
@@ -146,12 +147,22 @@ memory_alloc:
     pushq %rdi
     addq %r10, %rdi
     syscall
-    movq %rax, current_brk
+
+    # Verifica se alocou 
     popq %rdi
+    cmpq %rax, current_brk
+    jne _certoAlloc
+
+    movq $0, %rax
+    jmp _teste
+
+    _certoAlloc:
+    movq %rax, current_brk
     subq %rdi, %rax
     movq %rax, %r10
     subq $9, %rdi
     movq %rdi, 1(%r10)
+    jmp _fim
 
     # Marca o bloco como alocado e coloca o endereço de rotorno em %rax
     _fim:
@@ -160,5 +171,6 @@ memory_alloc:
     addq $9, %rax
 
     # Rotina no retorno de procedimentos
+    _teste:
     popq %rbp
     ret
