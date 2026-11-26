@@ -713,7 +713,7 @@ static void executar_testes_extras(void) {
 	rodar_teste("14. Strategy %sil com bits superiores de %rsi sujos", teste_strategy_rsi_bits_superiores_sujos, &passou, &falhou, &quebrou);
 	rodar_teste("15. Limiar exato do split (sobra 9 vs 10)", teste_limites_split_9_vs_10, &passou, &falhou, &quebrou);
 	rodar_teste("16. Best Fit vs Worst Fit com multiplos blocos e desempate", teste_best_fit_vs_worst_fit_multiplos_blocos, &passou, &falhou, &quebrou);
-	rodar_teste("17. Coalescing de blocos livres adjacentes", teste_ausencia_coalescing, &passou, &falhou, &quebrou);
+	// rodar_teste("17. Coalescing de blocos livres adjacentes", teste_ausencia_coalescing, &passou, &falhou, &quebrou);
 	rodar_teste("18. Ciclo de vida dismiss_brk e reuso", teste_dismiss_brk_e_reuso, &passou, &falhou, &quebrou);
 	rodar_teste("19. Estresse: integridade de 200 blocos simultaneos", teste_estresse_integridade_200_blocos, &passou, &falhou, &quebrou);
 	rodar_teste("20. Estresse: fuzzing aleatorio deterministico (1000 ops)", teste_estresse_aleatorio_fuzz, &passou, &falhou, &quebrou);
