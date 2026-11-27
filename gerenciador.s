@@ -113,6 +113,8 @@ memory_alloc:
     # Usa o tamanho pedido em %rdi como limite inicial do worst-fit
     # blocos livres maiores que %r11 substituirão o melhor candidato atual
     movq %rdi, %r11
+    # %r11 - 1, pois (jbe _continuar) irá limitar ao primeiro maiorS
+    subq $1, %r11
     movq $_worst_fit, %rcx
 
     # Loop para encontar o melhor bloco livre disponível
@@ -134,7 +136,7 @@ memory_alloc:
     jae _continuar
     jmp _guardar
     _worst_fit:
-    jb _continuar
+    jbe _continuar
     # Garda o endereço que é o melhor até o momento
     _guardar:
     movq %r8, %r10
