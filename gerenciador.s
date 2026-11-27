@@ -35,8 +35,13 @@ memory_free:
     cmpq %rdi, %r8
     jne _invalido
 
+    # Procedimento para não possibilitar double_free
+    cmpb $0, -9(%rdi)
+    je _invalido
+    
     # Procedimento de marcar o bloco como livre
     movb $0, -9(%rdi)
+    
     # Retorno do procedimento 
     movq $0, %rax
     jmp _ret_f
