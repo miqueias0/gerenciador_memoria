@@ -10,7 +10,11 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-clean:
-	rm -f $(OBJS) $(TARGET)
+debug: CFLAGS += -DDEBUG
+debug: $(OBJS) tests/testes.o
+	$(CC) $^ -o $(TARGET)
 
-.PHONY: all clean
+clean:
+	rm -f $(OBJS) tests/testes.o $(TARGET)
+
+.PHONY: all clean debug
