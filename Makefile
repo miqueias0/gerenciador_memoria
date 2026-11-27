@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -O2 -g
-LDFLAGS =
+LDFLAGS = -no-pie
 
 TARGET = saida
 OBJS = main.o gerenciador.o

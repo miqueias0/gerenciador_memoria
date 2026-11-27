@@ -103,7 +103,7 @@ memory_alloc:
     # Para garantir que qualquer tamanho válido seja menor na primeira comparação do algoritmo best-fit
     movq $0x7FFFFFFFFFFFFFFF, %r11
     movq $_best_fit, %rcx
-    cmpq $1, %rsi
+    cmpb $1, %sil
     je _loop
     # Usa o tamanho pedido em %rdi como limite inicial do worst-fit
     # blocos livres maiores que %r11 substituirão o melhor candidato atual
