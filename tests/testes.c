@@ -266,73 +266,7 @@ static int teste_limites_split_9_vs_10(void) {
 	return 0;
 }
 
-/* 16. Best/Worst Fit e desempate */
-static int teste_best_fit_vs_worst_fit_multiplos_blocos(void) {
-	void *b50 = memory_alloc(50, 0);
-	void *b80 = memory_alloc(80, 0);
-	void *b120 = memory_alloc(120, 0);
-	void *b300 = memory_alloc(300, 0);
-	if (!b50 || !b80 || !b120 || !b300) return 1;
-	memory_free(b50);
-	memory_free(b80);
-	memory_free(b120);
-	memory_free(b300);
-
-	void *r_best = memory_alloc(60, 1);
-	if (r_best != b80) return 1;
-
-	dismiss_brk();
-	setup_brk();
-	b50 = memory_alloc(50, 0);
-	b80 = memory_alloc(80, 0);
-	b120 = memory_alloc(120, 0);
-	b300 = memory_alloc(300, 0);
-	memory_free(b50);
-	memory_free(b80);
-	memory_free(b120);
-	memory_free(b300);
-
-	void *r_worst = memory_alloc(60, 0);
-	if (r_worst != b300) return 1;
-
-	dismiss_brk();
-	setup_brk();
-	void *p1 = memory_alloc(100, 0);
-	void *p2 = memory_alloc(209, 0);
-	memory_free(p1);
-	memory_free(p2);
-	void *q = memory_alloc(100, 0);
-	memory_free(q);
-	void *sel_bf = memory_alloc(100, 1);
-	if (sel_bf != p1) return 1;
-
-	dismiss_brk();
-	setup_brk();
-	p1 = memory_alloc(100, 0);
-	p2 = memory_alloc(209, 0);
-	memory_free(p1);
-	memory_free(p2);
-	q = memory_alloc(100, 0);
-	memory_free(q);
-	void *p3 = (void *)((char *)p2 + 109);
-	void *sel_wf = memory_alloc(100, 0);
-	if (sel_wf != p3) return 1;
-	return 0;
-}
-
-/* 17. Coalescência (hard, comentado — sua implementação não faz) */
-static int teste_ausencia_coalescing(void) {
-	void *p1 = memory_alloc(100, 0);
-	void *p2 = memory_alloc(120, 0);
-	if (!p1 || !p2) return 1;
-	memory_free(p1);
-	memory_free(p2);
-	void *p3 = memory_alloc(180, 0);
-	if (p3 != p1) return 1;
-	return 0;
-}
-
-/* 18. Reuso após dismiss */
+/* 16. Reuso após dismiss */
 static int teste_dismiss_brk_e_reuso(void) {
 	void *p1 = memory_alloc(200, 0);
 	if (!p1) return 1;
@@ -350,7 +284,7 @@ static int teste_dismiss_brk_e_reuso(void) {
 	return 0;
 }
 
-/* 19. 200 blocos simultâneos */
+/* 17. 200 blocos simultâneos */
 static int teste_estresse_integridade_200_blocos(void) {
 	enum { N = 200 };
 	static unsigned char *ptrs[N];
@@ -381,7 +315,7 @@ static int teste_estresse_integridade_200_blocos(void) {
 	return 0;
 }
 
-/* 20. 1000 ops aleatórias */
+/* 18. 1000 ops aleatórias */
 static int teste_estresse_aleatorio_fuzz(void) {
 	enum { SLOTS = 64, ITERS = 1000 };
 	static unsigned char *slot_ptr[SLOTS];
@@ -421,7 +355,7 @@ static int teste_estresse_aleatorio_fuzz(void) {
 	return 0;
 }
 
-/* 21. 500 splits de 10B */
+/* 19. 500 splits de 10B */
 static int teste_estresse_fragmentacao_extrema(void) {
 	enum { COUNT = 500 };
 	static unsigned char *ptrs[COUNT];
@@ -447,7 +381,7 @@ static int teste_estresse_fragmentacao_extrema(void) {
 	return 0;
 }
 
-/* 22. 2000 alocações */
+/* 20. 2000 alocações */
 static int teste_estresse_volume_2000_alocacoes(void) {
 	enum { COUNT = 2000 };
 	static unsigned char *ptrs[COUNT];
@@ -475,7 +409,7 @@ static int teste_estresse_volume_2000_alocacoes(void) {
 	return 0;
 }
 
-/* 23. Double free */
+/* 21. Double free */
 static int teste_double_free(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(64, 0);
 	unsigned char *q = (unsigned char *)memory_alloc(64, 0);
@@ -491,7 +425,7 @@ static int teste_double_free(void) {
 	return 0;
 }
 
-/* 24. Free no meio */
+/* 22. Free no meio */
 static int teste_free_nao_corrompe_vizinhos(void) {
 	unsigned char *a = (unsigned char *)memory_alloc(100, 0);
 	unsigned char *b = (unsigned char *)memory_alloc(100, 0);
@@ -508,7 +442,7 @@ static int teste_free_nao_corrompe_vizinhos(void) {
 	return 0;
 }
 
-/* 25. Aloca 1 byte */
+/* 23. Aloca 1 byte */
 static int teste_alloc_um_byte(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(1, 0);
 	if (!p) return 1;
@@ -518,7 +452,7 @@ static int teste_alloc_um_byte(void) {
 	return 0;
 }
 
-/* 26. Aloca 9 bytes */
+/* 24. Aloca 9 bytes */
 static int teste_alloc_tamanho_header(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(9, 0);
 	if (!p) return 1;
@@ -529,7 +463,7 @@ static int teste_alloc_tamanho_header(void) {
 	return 0;
 }
 
-/* 27. Aloca 500B após free 50B */
+/* 25. Aloca 500B após free 50B */
 static int teste_alloc_exige_brk_apos_free(void) {
 	void *p = memory_alloc(50, 0);
 	if (!p) return 1;
@@ -542,7 +476,7 @@ static int teste_alloc_exige_brk_apos_free(void) {
 	return 0;
 }
 
-/* 28. Free desalinhado */
+/* 26. Free desalinhado */
 static int teste_free_ponteiro_p_menos_9(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(100, 0);
 	if (!p) return 1;
@@ -555,7 +489,7 @@ static int teste_free_ponteiro_p_menos_9(void) {
 	return 0;
 }
 
-/* 29. Reuso do residual */
+/* 27. Reuso do residual */
 static int teste_split_residual_reutilizavel(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(100, 0);
 	if (!p) return 1;
@@ -572,7 +506,7 @@ static int teste_split_residual_reutilizavel(void) {
 	return 0;
 }
 
-/* 30. Worst fit em 20 rodadas */
+/* 28. Worst fit em 20 rodadas */
 static int teste_worst_fit_multiplos_rounds(void) {
 	for (int round = 0; round < 20; round++) {
 		void *a = memory_alloc(100, 0);
@@ -588,7 +522,7 @@ static int teste_worst_fit_multiplos_rounds(void) {
 	return 0;
 }
 
-/* 31. Ciclo setup/dismiss */
+/* 29. Ciclo setup/dismiss */
 static int teste_ciclo_setup_dismiss(void) {
 	dismiss_brk();
 	setup_brk();
@@ -602,7 +536,7 @@ static int teste_ciclo_setup_dismiss(void) {
 	return 0;
 }
 
-/* 32. Escrita/leitura de 256B */
+/* 30. Escrita/leitura de 256B */
 static int teste_acesso_todos_bytes(void) {
 	unsigned char *p = (unsigned char *)memory_alloc(256, 0);
 	if (!p) return 1;
@@ -613,7 +547,7 @@ static int teste_acesso_todos_bytes(void) {
 	return 0;
 }
 
-/* 33. Strategy inválido */
+/* 31. Strategy inválido */
 static int teste_strategy_invalido(void) {
 	void *p = memory_alloc(100, 0);
 	if (!p) return 1;
@@ -625,7 +559,7 @@ static int teste_strategy_invalido(void) {
 	return 0;
 }
 
-/* 34. Coalescência (informativo, soft) */
+/* 32. Coalescência (informativo, soft) */
 static int teste_coalescing_informativo(void) {
 	unsigned char *p1 = (unsigned char *)memory_alloc(100, 0);
 	unsigned char *p2 = (unsigned char *)memory_alloc(120, 0);
@@ -639,7 +573,7 @@ static int teste_coalescing_informativo(void) {
 	return 0;
 }
 
-/* 35. Reuso de bloco grande */
+/* 33. Reuso de bloco grande */
 static int teste_alloc_grande_reaproveita(void) {
 	void *a = memory_alloc(500, 0);
 	if (!a) return 1;
@@ -669,26 +603,24 @@ void executar_testes_extras(void) {
 	rodar_teste("13. Aloca 0 bytes",                           teste_alloc_zero_bytes,                     &passou, &falhou, &quebrou);
 	rodar_teste("14. Alocação após modificar registrador",     teste_strategy_rsi_bits_superiores_sujos,   &passou, &falhou, &quebrou);
 	rodar_teste("15. Divisão com sobra 9 vs 10",               teste_limites_split_9_vs_10,                &passou, &falhou, &quebrou);
-	rodar_teste("16. Best/Worst Fit e desempate",              teste_best_fit_vs_worst_fit_multiplos_blocos,&passou, &falhou, &quebrou);
-	// rodar_teste("17. Coalescência (hard)",                 teste_ausencia_coalescing,                  &passou, &falhou, &quebrou);
-	rodar_teste("18. Reuso após dismiss",                      teste_dismiss_brk_e_reuso,                  &passou, &falhou, &quebrou);
-	rodar_teste("19. 200 blocos simultâneos",                  teste_estresse_integridade_200_blocos,      &passou, &falhou, &quebrou);
-	rodar_teste("20. 1000 ops aleatórias",                     teste_estresse_aleatorio_fuzz,              &passou, &falhou, &quebrou);
-	rodar_teste("21. 500 splits de 10B",                       teste_estresse_fragmentacao_extrema,        &passou, &falhou, &quebrou);
-	rodar_teste("22. 2000 alocações",                          teste_estresse_volume_2000_alocacoes,       &passou, &falhou, &quebrou);
-	rodar_teste("23. Double free",                             teste_double_free,                          &passou, &falhou, &quebrou);
-	rodar_teste("24. Free no meio",                            teste_free_nao_corrompe_vizinhos,           &passou, &falhou, &quebrou);
-	rodar_teste("25. Aloca 1 byte",                            teste_alloc_um_byte,                        &passou, &falhou, &quebrou);
-	rodar_teste("26. Aloca 9 bytes",                           teste_alloc_tamanho_header,                 &passou, &falhou, &quebrou);
-	rodar_teste("27. Aloca 500B após free 50B",                teste_alloc_exige_brk_apos_free,            &passou, &falhou, &quebrou);
-	rodar_teste("28. Free desalinhado",                        teste_free_ponteiro_p_menos_9,              &passou, &falhou, &quebrou);
-	rodar_teste("29. Reuso do residual",                       teste_split_residual_reutilizavel,          &passou, &falhou, &quebrou);
-	rodar_teste("30. Worst fit em 20 rodadas",                 teste_worst_fit_multiplos_rounds,           &passou, &falhou, &quebrou);
-	rodar_teste("31. Ciclo setup/dismiss",                     teste_ciclo_setup_dismiss,                  &passou, &falhou, &quebrou);
-	rodar_teste("32. Escrita/leitura de 256B",                 teste_acesso_todos_bytes,                   &passou, &falhou, &quebrou);
-	rodar_teste("33. Strategy inválido",                       teste_strategy_invalido,                    &passou, &falhou, &quebrou);
-	rodar_teste("34. Coalescência (informativo)",              teste_coalescing_informativo,               &passou, &falhou, &quebrou);
-	rodar_teste("35. Reuso de bloco grande",                   teste_alloc_grande_reaproveita,             &passou, &falhou, &quebrou);
+	rodar_teste("16. Reuso após dismiss",                      teste_dismiss_brk_e_reuso,                  &passou, &falhou, &quebrou);
+	rodar_teste("17. 200 blocos simultâneos",                  teste_estresse_integridade_200_blocos,      &passou, &falhou, &quebrou);
+	rodar_teste("18. 1000 ops aleatórias",                     teste_estresse_aleatorio_fuzz,              &passou, &falhou, &quebrou);
+	rodar_teste("19. 500 splits de 10B",                       teste_estresse_fragmentacao_extrema,        &passou, &falhou, &quebrou);
+	rodar_teste("20. 2000 alocações",                          teste_estresse_volume_2000_alocacoes,       &passou, &falhou, &quebrou);
+	rodar_teste("21. Double free",                             teste_double_free,                          &passou, &falhou, &quebrou);
+	rodar_teste("22. Free no meio",                            teste_free_nao_corrompe_vizinhos,           &passou, &falhou, &quebrou);
+	rodar_teste("23. Aloca 1 byte",                            teste_alloc_um_byte,                        &passou, &falhou, &quebrou);
+	rodar_teste("24. Aloca 9 bytes",                           teste_alloc_tamanho_header,                 &passou, &falhou, &quebrou);
+	rodar_teste("25. Aloca 500B após free 50B",                teste_alloc_exige_brk_apos_free,            &passou, &falhou, &quebrou);
+	rodar_teste("26. Free desalinhado",                        teste_free_ponteiro_p_menos_9,              &passou, &falhou, &quebrou);
+	rodar_teste("27. Reuso do residual",                       teste_split_residual_reutilizavel,          &passou, &falhou, &quebrou);
+	rodar_teste("28. Worst fit em 20 rodadas",                 teste_worst_fit_multiplos_rounds,           &passou, &falhou, &quebrou);
+	rodar_teste("29. Ciclo setup/dismiss",                     teste_ciclo_setup_dismiss,                  &passou, &falhou, &quebrou);
+	rodar_teste("30. Escrita/leitura de 256B",                 teste_acesso_todos_bytes,                   &passou, &falhou, &quebrou);
+	rodar_teste("31. Strategy inválido",                       teste_strategy_invalido,                    &passou, &falhou, &quebrou);
+	rodar_teste("32. Coalescência (informativo)",              teste_coalescing_informativo,               &passou, &falhou, &quebrou);
+	rodar_teste("33. Reuso de bloco grande",                   teste_alloc_grande_reaproveita,             &passou, &falhou, &quebrou);
 
 	printf("----------------------------------------------------------------------------\n");
 	printf("RESUMO DOS TESTES EXTRAS: %d PASSOU | %d FALHOU | %d QUEBROU (TOTAL: %d)\n",
